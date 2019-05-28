@@ -1,0 +1,4 @@
+FROM microsoft/nanoserver
+ADD ReadWriteFile /ReadWriteFile
+WORKDIR /ReadWriteFile
+CMD ["ReadWriteFile.exe", "taskdata0.txt", "outtaskdata0.txt"]
