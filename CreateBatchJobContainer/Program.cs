@@ -128,11 +128,21 @@ namespace CreateBatchJobContainer
                 }
 
                 Console.WriteLine("Creating job [{0}]...", JobId);
+                CloudJob job = null;
                 try
                 {
-                    CloudJob job = batchClient.JobOperations.CreateJob();
+                    job = batchClient.JobOperations.CreateJob();
                     job.Id = JobId;
                     job.PoolInformation = new PoolInformation { PoolId = PoolId };
+
+                    // Add job preparation task to remove existing Docker image
+                    Console.WriteLine("Adding job preparation task to job [{0}]...", JobId);
+                    string jobPreparationCmdLine = $"cmd /c docker rmi -f {ContainerImageNames[0]}:latest";
+                    JobPreparationTask jobPreparationTask = new JobPreparationTask(jobPreparationCmdLine)
+                    {
+                        UserIdentity = new UserIdentity(new AutoUserSpecification(elevationLevel: ElevationLevel.Admin, scope: AutoUserScope.Task))
+                    };
+                    job.JobPreparationTask = jobPreparationTask;
 
                     job.Commit();
                 }
@@ -149,32 +159,34 @@ namespace CreateBatchJobContainer
                     }
                 }
 
-                // Create a collection to hold the tasks that we'll be adding to the job
-                Console.WriteLine("Adding {0} tasks to job [{1}]...", inputFiles.Count, JobId);
-
-                List<CloudTask> tasks = new List<CloudTask>();
-
-                // Create each of the tasks to process one of the input files. 
-                for (int i = 0; i < inputFiles.Count; i++)
+                if (job != null)
                 {
-                    string taskId = String.Format("Task{0}", i);
-                    string inputFilename = inputFiles[i].FilePath;
-                    string outputFileName = string.Format("out{0}", inputFilename);
+                    // Create a collection to hold the tasks that we'll be adding to the job
+                    Console.WriteLine("Adding {0} tasks to job [{1}]...", inputFiles.Count, JobId);
 
-                    // Override the default entrypoint of the container
-                    string taskCommandLine = string.Format("C:\\ReadWriteFile\\ReadWriteFile.exe {0} {1}", inputFilename, outputFileName);
+                    List<CloudTask> tasks = new List<CloudTask>();
 
-                    // Specify the container the task will run
-                    TaskContainerSettings cmdContainerSettings = new TaskContainerSettings(
-                        imageName: "nimccollftacr.azurecr.io/batch/readwritefile"
-                        );
+                    // Create each of the tasks to process one of the input files. 
+                    for (int i = 0; i < inputFiles.Count; i++)
+                    {
+                        string taskId = String.Format("Task{0}", i);
+                        string inputFilename = inputFiles[i].FilePath;
+                        string outputFileName = string.Format("out{0}", inputFilename);
 
-                    CloudTask task = new CloudTask(taskId, taskCommandLine);
-                    task.ContainerSettings = cmdContainerSettings;
+                        // Override the default entrypoint of the container
+                        string taskCommandLine = string.Format("C:\\ReadWriteFile\\ReadWriteFile.exe {0} {1}", inputFilename, outputFileName);
 
-                    // Set the resource files and output files for the task
-                    task.ResourceFiles = new List<ResourceFile> { inputFiles[i] };
-                    task.OutputFiles = new List<OutputFile>
+                        // Specify the container the task will run
+                        TaskContainerSettings cmdContainerSettings = new TaskContainerSettings(
+                            imageName: "nimccollftacr.azurecr.io/batch/readwritefile"
+                            );
+
+                        CloudTask task = new CloudTask(taskId, taskCommandLine);
+                        task.ContainerSettings = cmdContainerSettings;
+
+                        // Set the resource files and output files for the task
+                        task.ResourceFiles = new List<ResourceFile> { inputFiles[i] };
+                        task.OutputFiles = new List<OutputFile>
                     {
                         new OutputFile(
                             filePattern: outputFileName,
@@ -182,37 +194,38 @@ namespace CreateBatchJobContainer
                             uploadOptions: new OutputFileUploadOptions(OutputFileUploadCondition.TaskCompletion))
                     };
 
-                    // You must elevate the identity of the task in order to run a container
-                    task.UserIdentity = new UserIdentity(new AutoUserSpecification(elevationLevel: ElevationLevel.Admin, scope: AutoUserScope.Task));
-                    tasks.Add(task);
-                }
+                        // You must elevate the identity of the task in order to run a container
+                        task.UserIdentity = new UserIdentity(new AutoUserSpecification(elevationLevel: ElevationLevel.Admin, scope: AutoUserScope.Task));
+                        tasks.Add(task);
+                    }
 
-                // Add all tasks to the job.
-                batchClient.JobOperations.AddTask(JobId, tasks);
+                    // Add all tasks to the job.
+                    batchClient.JobOperations.AddTask(JobId, tasks);
 
-                // Monitor task success/failure, specifying a maximum amount of time to wait for the tasks to complete.
-                TimeSpan timeout = TimeSpan.FromMinutes(30);
-                Console.WriteLine("Monitoring all tasks for 'Completed' state, timeout in {0}...", timeout);
+                    // Monitor task success/failure, specifying a maximum amount of time to wait for the tasks to complete.
+                    TimeSpan timeout = TimeSpan.FromMinutes(30);
+                    Console.WriteLine("Monitoring all tasks for 'Completed' state, timeout in {0}...", timeout);
 
-                IEnumerable<CloudTask> addedTasks = batchClient.JobOperations.ListTasks(JobId);
+                    IEnumerable<CloudTask> addedTasks = batchClient.JobOperations.ListTasks(JobId);
 
-                batchClient.Utilities.CreateTaskStateMonitor().WaitAll(addedTasks, TaskState.Completed, timeout);
+                    batchClient.Utilities.CreateTaskStateMonitor().WaitAll(addedTasks, TaskState.Completed, timeout);
 
-                Console.WriteLine("All tasks reached state Completed.");
+                    Console.WriteLine("All tasks reached state Completed.");
 
-                // Print task output
-                Console.WriteLine();
-                Console.WriteLine("Printing task output...");
+                    // Print task output
+                    Console.WriteLine();
+                    Console.WriteLine("Printing task output...");
 
-                IEnumerable<CloudTask> completedtasks = batchClient.JobOperations.ListTasks(JobId);
+                    IEnumerable<CloudTask> completedtasks = batchClient.JobOperations.ListTasks(JobId);
 
-                foreach (CloudTask task in completedtasks)
-                {
-                    string nodeId = String.Format(task.ComputeNodeInformation.ComputeNodeId);
-                    Console.WriteLine("Task: {0}", task.Id);
-                    Console.WriteLine("Node: {0}", nodeId);
-                    Console.WriteLine("Standard out:");
-                    Console.WriteLine(task.GetNodeFile(Constants.StandardOutFileName).ReadAsString());
+                    foreach (CloudTask task in completedtasks)
+                    {
+                        string nodeId = String.Format(task.ComputeNodeInformation.ComputeNodeId);
+                        Console.WriteLine("Task: {0}", task.Id);
+                        Console.WriteLine("Node: {0}", nodeId);
+                        Console.WriteLine("Standard out:");
+                        Console.WriteLine(task.GetNodeFile(Constants.StandardOutFileName).ReadAsString());
+                    }
                 }
 
                 // Clean up Batch resources (if the user so chooses)
