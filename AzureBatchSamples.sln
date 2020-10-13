@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueueProcessingJobManager",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessMessage", "ProcessMessage\ProcessMessage.csproj", "{8E44D50F-DDED-46DC-B445-ADBB3B56C685}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CopyStartupFiles", "CopyStartupFiles\CopyStartupFiles.csproj", "{5B578ABE-D9E7-4688-AE75-381128EBB889}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreatePoolWithStartupTask", "CreatePoolWithStartupTask\CreatePoolWithStartupTask.csproj", "{BB842BFF-B9D4-4228-852E-F9A2962C1AF1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{8E44D50F-DDED-46DC-B445-ADBB3B56C685}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E44D50F-DDED-46DC-B445-ADBB3B56C685}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E44D50F-DDED-46DC-B445-ADBB3B56C685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B578ABE-D9E7-4688-AE75-381128EBB889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B578ABE-D9E7-4688-AE75-381128EBB889}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B578ABE-D9E7-4688-AE75-381128EBB889}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B578ABE-D9E7-4688-AE75-381128EBB889}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB842BFF-B9D4-4228-852E-F9A2962C1AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB842BFF-B9D4-4228-852E-F9A2962C1AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB842BFF-B9D4-4228-852E-F9A2962C1AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB842BFF-B9D4-4228-852E-F9A2962C1AF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

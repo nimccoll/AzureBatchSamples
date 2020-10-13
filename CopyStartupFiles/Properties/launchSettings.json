@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CopyStartupFiles": {
+      "commandName": "Project",
+      "commandLineArgs": "\"c:\\data\\test\\shared\""
+    }
+  }
+}
