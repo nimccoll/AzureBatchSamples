@@ -10,6 +10,8 @@
 //===============================================================================
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Files.Shares;
+using Azure.Storage.Files.Shares.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +21,8 @@ namespace CopyStartupFiles
 {
     class Program
     {
-        private static readonly string AZURE_STORAGE_CONNECTION_STRING = "{your storage account connection string here}";
+        private static readonly string AZURE_STORAGE_CONNECTION_STRING = "{your blob storage account connection string here}";
+        private static readonly string AZURE_FILES_CONNECTION_STRING = "{your files storage account connection string here}";
 
         static void Main(string[] args)
         {
@@ -36,7 +39,7 @@ namespace CopyStartupFiles
 
             List<BlobItem> blobs = containerClient.GetBlobs().ToList();
 
-            // Download the blob files in parallel - maximum of 10 at a time
+            // Download the blob files in parallel - maximum of 10 at a time }
             Parallel.ForEach(blobs, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, blob =>
             {
                 string downloadFilePath = Path.Combine(downloadDirectory, blob.Name);
@@ -49,6 +52,31 @@ namespace CopyStartupFiles
                     downloadFileStream.Close();
                 }
             });
+
+            string shareName = "startupfiles";
+
+            ShareClient shareClient = new ShareClient(AZURE_FILES_CONNECTION_STRING, shareName);
+
+            if (shareClient.Exists())
+            {
+                ShareDirectoryClient shareDirectoryClient = shareClient.GetRootDirectoryClient();
+
+                List<ShareFileItem> items = shareDirectoryClient.GetFilesAndDirectories().ToList();
+                foreach(ShareFileItem item in items)
+                {
+                    if (!item.IsDirectory)
+                    {
+                        string downloadFilePath = Path.Combine(downloadDirectory, item.Name);
+                        ShareFileClient shareFileClient = shareDirectoryClient.GetFileClient(item.Name);
+                        ShareFileDownloadInfo download = shareFileClient.Download();
+                        using (FileStream downloadFileStream = File.OpenWrite(downloadFilePath))
+                        {
+                            download.Content.CopyTo(downloadFileStream);
+                            downloadFileStream.Close();
+                        }
+                    }
+                }
+            }
         }
     }
 }
