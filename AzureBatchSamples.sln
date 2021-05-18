@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreatePoolWithStartupTask",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateBatchJobInVNet", "CreateBatchJobInVNet\CreateBatchJobInVNet.csproj", "{5A47B904-7CBF-483C-890D-185F935DDADB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlobStorageCopy", "BlobStorageCopy\BlobStorageCopy.csproj", "{F2D9D784-C582-4611-9EDD-083E814806BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{5A47B904-7CBF-483C-890D-185F935DDADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A47B904-7CBF-483C-890D-185F935DDADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A47B904-7CBF-483C-890D-185F935DDADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2D9D784-C582-4611-9EDD-083E814806BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2D9D784-C582-4611-9EDD-083E814806BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2D9D784-C582-4611-9EDD-083E814806BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2D9D784-C582-4611-9EDD-083E814806BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
