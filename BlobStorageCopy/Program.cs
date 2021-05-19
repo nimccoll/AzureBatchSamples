@@ -1,6 +1,6 @@
 ﻿//===============================================================================
 // Microsoft FastTrack for Azure
-// Azure Batch Samples.
+// Azure Batch Samples
 //===============================================================================
 // Copyright © Microsoft Corporation.  All rights reserved.
 // THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY
